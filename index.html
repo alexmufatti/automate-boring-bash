@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=1024"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <title>Automate boring stuff with bash</title>
+  <meta name="author" content="Francesco Sacchi"/>
+
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:regular,semibold,italic,italicsemibold|PT+Sans:400,700,400italic,700italic|PT+Serif:400,700,400italic,700italic"
+        rel="stylesheet"/>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0/css/reveal.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0/css/theme/white.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0/lib/css/zenburn.min.css">
+  <link rel="stylesheet" href="intre.css">
+
+  <link rel="shortcut icon" href="favicon.png"/>
+  <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+</head>
+
+<body>
+
+<div class="reveal">
+  <div class="slides">
+    <section class="title-slide">
+      <div>Automate boring stuff with bash</div>
+      <div class="subtitle">...Synology, aruba VPS, cron, WebDav, and some nerdiness!</div>
+    </section>
+    <section class="title-slide img-slide">
+      <h3>Architettura</h3>
+      <img src="images/diagram.svg"/>
+    </section>
+    <section class="title-slide white-bg">
+      <h3>Synology</h3>
+      <ul>
+        <li>A casa mia (on premise)</li>
+        <li>Backup su amazon glacier</li>
+        <li>Accessibile dall'esterno solo sulle porte dei servizi attivi</li>
+        <li>Synology DiskStation (Dropbox/OwnCloud clone)</li>
+      </ul>
+    </section>
+    <section class="title-slide white-bg">
+      <h3>Aruba VPS</h3>
+      <ul>
+        <li>Non indeispendabile</li>
+        <li>Sempre attivo</li>
+        <li>Può hostare anche altri serizi utili (es: git web hooks..)</li>
+        <li>Fa girare gli script necessari in cron o syscontrol</li>
+      </ul>
+    </section>
+    <section class="title-slide white-bg">
+      <h3>Mobile / PC / Mac</h3>
+      <ul>
+        <li>Un qualsiasi dispositivo che abbia un client DiskStation</li>
+        <li class="fragment">o WebDav</li>
+        <li class="fragment">o qualsiasi altra cosa per cui ci sia un server installabile su VPS</li>
+      </ul>
+    </section>
+    <section class="title-slide img-slide">
+      <h3>Come funziona</h3>
+      <img src="images/schema.svg"/>
+    </section>
+    <section class="title-slide img-slide">
+      <h3>Demo time</h3>
+      <h1 class="fragment">💣</h1>
+    </section>
+    <section class="title-slide white-bg">
+      <h3>Runner</h3>
+      <pre><code>#!/bin/bash
+
+for i in *; do
+  echo -ne "Testing $i:"
+  for s in $HOME/.scripts/automation.d/*.sh; do
+      echo -ne "$(basename $s) ("
+    $s "$i"
+    echo -ne "), "
+  done
+  echo -ne "\n"
+done</code></pre>
+    </section>
+    <section class="title-slide white-bg">
+      <section class="title-slide white-bg">
+        <h3>Actions - spese</h3>
+        <pre><code>#!/bin/bash
+
+DEST="$HOME/SynologyDrive/Documents/Documenti Personali/Unico"
+
+function rename_and_move () {
+  YEAR=`echo "$1" | cut -c 1-4`
+  [[ ! -f "$DEST/$YEAR" ]] && mkdir -p "$DEST/$YEAR"
+  mv "$1" "$DEST/$YEAR/$(basename $1)-testcamp.pdf"
+}
+
+FILE=$1
+
+if [[ ! -f $FILE ]] || [[ $FILE != *"spese mediche"* ]]; then echo -ne "N"; exit 0;fi
+
+rename_and_move "$FILE"
+echo -ne "Y"</code></pre>
+      </section>
+      <section class="title-slide white-bg">
+        <pre><code>YEAR=`echo "$1" | cut -c 1-4`</code></pre>
+<br />
+        <pre><code>mv "$1" "$DEST/$YEAR/$(basename $1)-testcamp.pdf"</code></pre>
+        <ul>
+          <li>cut</li>
+          <li>`</li>
+          <li>$(...)</li>
+        </ul>
+      </section>
+      <section class="title-slide white-bg">
+        <pre><code>if [[ ! -f $FILE ]] || [[ $FILE != *"spese mediche"* ]]; then echo -ne "N"; exit 0;fi</code></pre>
+        <ul>
+          <li>if</li>
+          <li>*"..."*</li>
+          <li>echo -ne</li>
+        </ul>
+      </section>
+    </section>
+    <section class="title-slide white-bg">
+      <section class="title-slide white-bg">
+        <h3>Actions - telepass</h3>
+        <pre><code>#!/bin/bash
+
+DEST="$HOME/SynologyDrive/Documents/Documenti Lavoro"
+
+function rename_and_move () {
+  DATA=`pdftotext "$1" - | awk '/DATA/ { getline; print $3 }'`
+  YEAR=`echo $DATA | cut -d'-' -f 3`
+  MONTH=`echo $DATA | cut -d'-' -f 2`
+  DAY=`echo $DATA | cut -d'-' -f 1`
+  [[ ! -f "$DEST/$YEAR/Spese/$MONTH" ]] && mkdir -p "$DEST/$YEAR/Spese/$MONTH"
+  mv $1 "$DEST/$YEAR/Spese/$MONTH/$YEAR-$MONTH-$DAY-telepass-testcamp.pdf"
+}
+
+FILE=$1
+
+
+if [[ ! -f $FILE ]] || [[ ! ${FILE: -4} == ".pdf" ]]; then echo -ne "N"; exit 0;fi
+
+MATCH=$(pdftotext "$FILE" - | grep TELEPASS)
+if [ ! -z "$MATCH" ]; then
+  rename_and_move "$FILE"
+  echo -ne "Y"
+else
+    echo -ne "N"
+fi</code></pre>
+      </section>
+        <section class="title-slide white-bg">
+        <pre><code>DATA=`pdftotext "$1" - | awk '/DATA/ { getline; print $3 }'`</code></pre>
+          <ul>
+            <li>awk</li>
+            <li>pdftotext</li>
+            <li>"..."</li>
+          </ul>
+        </section>
+        <section class="title-slide white-bg">
+        <pre><code>YEAR=`echo $DATA | cut -d'-' -f 3`</code></pre>
+          <ul>
+            <li>cut -d</li>
+          </ul>
+        </section>
+        <section class="title-slide white-bg">
+        <pre><code>if [[ ! -f $FILE ]] || [[ ! ${FILE: -4} == ".pdf" ]]; then echo -ne "N"; exit 0;fi</code></pre>
+          <ul>
+            <li>${FILE: -4}</li>
+          </ul>
+        </section>
+      </section>
+    <section class="title-slide white-bg">
+      <h3>Conclusioni</h3>
+      <ul>
+        <li>Con bash potete fare di tutto</li>
+        <li>Il limite è solo la vostra fantasia</li>
+        <li>Con bash potete spaccare tutto</li>
+        <li>Usate <i>sudo</i> con parsimonia</li>
+        <li class="fragment">RTFM (man-page)</li>
+      </ul>
+      <div></div>
+    </section>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0/js/reveal.js"></script>
+<script>
+  var link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = window.location.search.match(/print-pdf/gi) ? 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/print/pdf.css' : 'css/print/paper.css';
+  document.getElementsByTagName('head')[0].appendChild(link);
+</script>
+<script>
+  Reveal.initialize(
+  {
+    controlsTutorial: false,
+    transition: 'none',
+    backgroundTransition: 'none',
+    dependencies: [
+      {src: 'https://cdn.jsdelivr.net/gh/depsir/reveal-footer@0.0.2/footer.js', async: true},
+      {
+        src: 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0/plugin/highlight/highlight.min.js',
+        async: true,
+        callback: function () {
+          hljs.initHighlightingOnLoad();
+        }
+      }
+    ],
+    footer: 'Command line essentials - I3 Camp 6/2018',
+    history: true,
+    slideNumber: 'c/t'
+  });
+</script>
+
+</body>
+</html>

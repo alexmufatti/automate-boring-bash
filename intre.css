@@ -1,0 +1,149 @@
+/*
+    img-slide: only 1 image, no footer
+    title-slide: blue backgroud, text centered
+    title-slide white-bg: white background, text centered
+    half-image: white background, left image, right text
+ */
+.reveal section {
+    font-family: Open Sans, sans-serif;
+    display: flex;
+}
+
+.reveal .foot {
+    background-image:url("./images/intrelogow.png");
+    background-repeat:no-repeat;
+    background-position:right 50px center;
+    background-size:150px;
+    height:50px;
+    line-height: 50px;
+    font-size:15pt;
+    text-align: left;
+    padding-left: 50px;
+    color:#ADAFB4;
+}
+
+img {
+    object-fit:contain;
+}
+
+.foot:before {
+    content: "";
+    display: block;
+    width: 60px;
+    border-bottom: 1px solid #ADAFB4;
+}
+
+.reveal .img-slide .foot {
+    display:none;
+}
+.reveal .title-slide:not(.white-bg) .foot {
+    background-image:url("./images/intrelogo.png");
+    color:white;
+}
+.reveal pre {
+    margin: 0;
+    width: 100%;
+}
+.title-slide:not(.white-bg) .foot:before {
+    border-bottom: 1px solid white; /* This creates the border. Replace black with whatever color you want. */
+}
+
+.reveal section.title-slide {
+    background-color: #0061BB;
+    color: white;
+    font-size:65pt;
+}
+.reveal section:not(.title-slide) div {
+    text-align: left;
+    padding: 0 50px;
+}
+.title-slide .stretch {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+}
+.reveal section.title-slide.white-bg{
+    background-color: white;
+    color:black;
+    font-size:38pt;
+}
+.reveal .title-slide.white-bg .stretch{
+    display:flex;
+    justify-content: center;
+}
+.reveal .quote {
+    font-style: italic;
+}
+.reveal .quote-author{
+    font-size:28pt;
+    margin-top:10px;
+}
+.reveal .quote-author:before{
+content:'- '
+}
+.reveal .quote-author:after{
+content:' -'
+}
+.reveal section.img-slide {
+    background:none;
+}
+.reveal section h1, .reveal section h2, .reveal section h3 {
+    color: #0061BB;
+    text-transform: none;
+}
+.reveal pre{
+    background-color:#262626;
+    color:white;
+}
+.reveal pre.line-numbers {
+    float: left;
+    width: 25px;
+    text-align: right;
+    margin-right: 15px;
+    margin-left: 5px;
+    padding: 5px 0;
+    border-width: 0;
+    z-index:100;
+    box-shadow: none;
+}
+
+.reveal section.title-slide.white-bg img{
+    border: none;
+    padding: 20px;
+}
+
+.reveal section .card {
+    padding: 20px;
+    box-shadow: 0 0 10px;
+
+}
+.reveal section.title-slide.white-bg div.card img{
+    padding:0;
+    margin:0;
+    border-width: 0;
+    box-shadow: 0 0 0;
+}
+
+.half-image > div:not(.foot) {
+    display: flex;
+}
+
+.half-image > div > img {
+    width:100%;
+    object-fit: contain;
+    flex: 1;
+    min-width:0;
+    min-height: 0;
+    align-self: center;
+}
+.half-image > div > div {
+    flex: 1;
+}
+
+.small-text {
+    font-size: 32px;
+}
+
+div.subtitle {
+    font-size: 26px;
+}
