@@ -189,17 +189,10 @@ fi</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/headjs/1.0.3/head.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.7.0/js/reveal.js"></script>
 <script>
-  var link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.type = 'text/css';
-  link.href = window.location.search.match(/print-pdf/gi) ? 'https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/css/print/pdf.css' : 'css/print/paper.css';
-  document.getElementsByTagName('head')[0].appendChild(link);
-</script>
-<script>
   Reveal.initialize(
   {
     controlsTutorial: false,
-    transition: 'none',
+    transition: 'slide',
     backgroundTransition: 'none',
     dependencies: [
       {src: 'https://cdn.jsdelivr.net/gh/depsir/reveal-footer@0.0.2/footer.js', async: true},

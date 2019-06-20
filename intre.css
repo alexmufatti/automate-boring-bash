@@ -126,6 +126,7 @@ content:' -'
 
 .reveal section img{
   max-height: 80%;
+  padding: 10px 0;
 }
 
 .half-image > div:not(.foot) {
