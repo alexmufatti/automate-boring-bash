@@ -124,6 +124,10 @@ content:' -'
     box-shadow: 0 0 0;
 }
 
+.reveal section img{
+  max-height: 80%;
+}
+
 .half-image > div:not(.foot) {
     display: flex;
 }
